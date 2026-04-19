@@ -8,10 +8,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.ItemController;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -33,6 +35,7 @@ class ItemControllerTest {
     private ItemService itemService;
 
     private ItemDto itemDto;
+    private CommentDto commentDto;
     private final String header = "X-Sharer-User-Id";
 
     @BeforeEach
@@ -43,6 +46,28 @@ class ItemControllerTest {
                 .description("Песнь льда и пламени")
                 .available(true)
                 .build();
+
+        commentDto = CommentDto.builder()
+                .id(1L)
+                .text("Какая-то вещь опять")
+                .authorName("Ivan")
+                .created(LocalDateTime.now())
+                .build();
+    }
+
+    @Test
+    void createComment_commentDto_whenDataIsValid() throws Exception {
+        when(itemService.createComment(anyLong(), anyLong(), any(CommentDto.class)))
+                .thenReturn(commentDto);
+
+        mockMvc.perform(post("/items/1/comment")
+                        .header(header, 1L)
+                        .content(objectMapper.writeValueAsString(commentDto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.text").value("Какая-то вещь опять"))
+                .andExpect(jsonPath("$.authorName").value("Ivan"));
     }
 
     @Test
@@ -50,7 +75,7 @@ class ItemControllerTest {
         when(itemService.create(anyLong(), any(ItemDto.class))).thenReturn(itemDto);
 
         mockMvc.perform(post("/items")
-                        .header(header, 1L) // Проверяем передачу заголовка
+                        .header(header, 1L)
                         .content(objectMapper.writeValueAsString(itemDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -73,9 +98,10 @@ class ItemControllerTest {
 
     @Test
     void findById_itemDto_whenItemExists() throws Exception {
-        when(itemService.findById(1L)).thenReturn(itemDto);
+        when(itemService.findById(anyLong(), anyLong())).thenReturn(itemDto);
 
-        mockMvc.perform(get("/items/1"))
+        mockMvc.perform(get("/items/1")
+                        .header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Книга"));
     }
