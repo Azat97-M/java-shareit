@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,4 +32,16 @@ public class Item {
 
     @Column(name = "request_id")
     private Long request;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Item item)) return false;
+        return id != null && id.equals(item.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return getClass().hashCode();
+    }
 }
