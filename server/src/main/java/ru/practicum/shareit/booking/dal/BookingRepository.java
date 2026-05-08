@@ -1,0 +1,43 @@
+package ru.practicum.shareit.booking.dal;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+public interface BookingRepository extends JpaRepository<Booking, Long> {
+
+    List<Booking> findByBooker_Id(Long bookerId, Pageable pageable);
+
+    List<Booking> findByBooker_IdAndStatus(Long bookerId, BookingStatus status, Pageable pageable);
+
+    List<Booking> findByBooker_IdAndStartIsBeforeAndEndIsAfter(
+            Long bookerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Booking> findByBooker_IdAndEndIsBefore(Long bookerId, LocalDateTime end, Pageable pageable);
+
+    List<Booking> findByBooker_IdAndStartIsAfter(Long bookerId, LocalDateTime start, Pageable pageable);
+
+    List<Booking> findByItem_Owner_Id(Long ownerId, Pageable pageable);
+
+    List<Booking> findByItem_Owner_IdAndStatus(Long ownerId, BookingStatus status, Pageable pageable);
+
+    List<Booking> findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+            Long ownerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
+
+    List<Booking> findByItem_Owner_IdAndEndIsBefore(Long ownerId, LocalDateTime end, Pageable pageable);
+
+    List<Booking> findByItem_Owner_IdAndStartIsAfter(Long ownerId, LocalDateTime start, Pageable pageable);
+
+    List<Booking> findByItem_IdAndStatusNot(Long itemId, BookingStatus status, Sort sort);
+
+    List<Booking> findByItem_IdInAndStatusNot(List<Long> itemIds, BookingStatus status, Sort sort);
+
+    Optional<Booking> findByBooker_IdAndItem_IdAndStatusAndEndBefore(
+            Long bookerId, Long itemId, BookingStatus status, LocalDateTime now);
+}
