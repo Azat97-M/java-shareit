@@ -25,10 +25,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=shareit
       - SPRING_DATASOURCE_PASSWORD=shareit
     healthcheck:
-      test: ["CMD-SHELL", "cat < /dev/null > /dev/tcp/127.0.0.1/9090 || exit 1"]
+      test: [ "CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/9090' || exit 1" ]
       interval: 5s
       timeout: 5s
-      retries: 30
+      retries: 15
 
   db:
     image: postgres:16.1
@@ -40,13 +40,7 @@ services:
       - POSTGRES_USER=shareit
       - POSTGRES_DB=shareit
     healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
+      test: [ "CMD-SHELL", "pg_isready -U shareit -d shareit" ]
       interval: 5s
+      timeout: 5s
       retries: 10
-
-  healthcheck:
-    test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
-    timeout: 5s
-    interval: 5s
-    retries: 10
