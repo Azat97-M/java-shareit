@@ -11,8 +11,8 @@ import ru.practicum.shareit.comment.dal.CommentRepository;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
 import ru.practicum.shareit.comment.model.Comment;
+import ru.practicum.shareit.errorHandler.ConditionsNotMetException;
 import ru.practicum.shareit.errorHandler.NotFoundException;
-import ru.practicum.shareit.errorHandler.ValidationException;
 import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -50,7 +50,7 @@ public class ItemServiceImpl implements ItemService {
                 userId, itemId, BookingStatus.APPROVED, now).isPresent();
 
         if (!hasFinishedBooking) {
-            throw new ValidationException("Вы не можете оставить отзыв: аренда не завершена или не состоялась");
+            throw new ConditionsNotMetException("Вы не можете оставить отзыв: аренда не завершена или не состоялась");
         }
 
         Comment comment = CommentMapper.toComment(commentDto, item, user);

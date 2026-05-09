@@ -13,8 +13,8 @@ import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.errorHandler.ConditionsNotMetException;
 import ru.practicum.shareit.errorHandler.NotFoundException;
-import ru.practicum.shareit.errorHandler.ValidationException;
 import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
@@ -42,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
         validateBookingDates(bookingDto);
 
         if (!item.getAvailable()) {
-            throw new ValidationException("Вещь с id " + item.getId() + " недоступна");
+            throw new ConditionsNotMetException("Вещь с id " + item.getId() + " недоступна");
         }
         if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Владелец не может бронировать свою вещь");
@@ -59,10 +59,10 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getBookingOrThrow(bookingId);
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ValidationException("Пользователь " + userId + " не является владельцем вещи");
+            throw new ConditionsNotMetException("Пользователь " + userId + " не является владельцем вещи");
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new ValidationException("Статус бронирования уже изменен");
+            throw new ConditionsNotMetException("Статус бронирования уже изменен");
         }
 
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
@@ -139,12 +139,12 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateBookingDates(BookingDtoIn dto) {
         if (dto.getEnd().isBefore(dto.getStart()) || dto.getEnd().isEqual(dto.getStart())) {
-            throw new ValidationException("Дата окончания не может быть раньше или равна дате начала");
+            throw new ConditionsNotMetException("Дата окончания не может быть раньше или равна дате начала");
         }
     }
 
     private BookingState parseState(String state) {
         return BookingState.from(state)
-                .orElseThrow(() -> new ValidationException("Неизвестный статус: " + state));
+                .orElseThrow(() -> new NotFoundException("Неизвестный статус: " + state));
     }
 }
